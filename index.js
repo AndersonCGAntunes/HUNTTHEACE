@@ -12,10 +12,14 @@ let cards = [];
 
 const playGameButtonElem = document.getElementById('playGame');
 
+const cardContainerElem = document.querySelector('.card-container');
+
 const collapsedGridAreaTemplate = '"a a" "a a"';
 const cardCollectionCellClass = ".card-pos-a";
 
-const cardContainerElem = document.querySelector('.card-container');
+const numCards = cardObjectDefinition.length;
+
+const cardPositions = [];
 
 loadGame();
 
@@ -39,7 +43,7 @@ function initializeNewGame() {
 function startRound() {
     initializeNewRound();
     collectCards();
-
+    flipCards(true);
 }
 
 function initializeNewRound() {
@@ -61,6 +65,50 @@ function addCardsToGridAreaCell(cellPositionClassName) {
     cards.forEach((card, index) => {
         addChildElement(cellPositionElem, card);
     })
+}
+
+function flipCard(card, flipToBack) {
+    const innerCardElem = card.firstChild;
+
+    if (flipToBack && !innerCardElem.classList.contains('flip-it')) {
+        innerCardElem.classList.add('flip-it');
+    } else if (innerCardElem.classList.contains('flip-it')) {
+        innerCardElem.classList.remove('flip-it');
+    }
+}
+
+function flipCards(flipToBack) {
+    cards.forEach((card, index) => {
+        setTimeout(() => {
+            flipCard(card, flipToBack);
+        }, index * 100);
+    });
+}
+
+function shuffleCards() {
+    const id = setInterval(shuffle, 12);
+    let shuffleCount = 0;
+
+    function shuffle() {
+
+        randomizeCardPositions();
+
+        if (shuffleCount == 500) {
+            clearInterval(id);
+        } else {
+            shuffleCount++;
+        }
+    }
+}
+
+function randomizeCardPositions() {
+    const random1 = Math.floor(Math.random() * numCards) + 1;
+    const random2 = Math.floor(Math.random() * numCards) + 1;
+
+    const temp = cardPositions[random1 - 1];
+
+    cardPositions[random1 - 1] = cardPositions[random2 - 1];
+    cardPositions[random2 - 1] = temp;
 }
 
 function createCards() {
@@ -122,7 +170,13 @@ function createCard(cardItem) {
 
     // add card element as childe element to appropriate grid cell
     addCardToGridCell(cardElem);
+
+    initializeCardPositions(cardElem);
     
+}
+
+function initializeCardPositions(card) {
+    cardPositions.push(card.id);
 }
 
 function createElement(elemType) {
